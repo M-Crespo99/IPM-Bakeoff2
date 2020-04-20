@@ -6,6 +6,7 @@
 // Processing reference: https://processing.org/reference/
 
 import java.util.Collections;
+import java.text.DecimalFormat;
 
 // Target properties
 float PPI, PPCM;
@@ -38,6 +39,10 @@ class Target
     w = twidth;
   }
 }
+
+
+
+ArrayList<Float> dificulty_list = new ArrayList<Float>();
 
 // Setup window and vars - runs once
 void setup()
@@ -111,18 +116,26 @@ void randomizeTrials()
 // Print results at the end of the study
 void printResults(float timeTaken, float penalty)
 {
+  int i;
+  int h=200;
+  
   background(0);       // clears screen
 
   fill(255);    //set text fill color to white
   text(day() + "/" + month() + "/" + year() + "  " + hour() + ":" + minute() + ":" + second(), 100, 20);   // display time on screen
 
-  text("Finished!", width / 2, height / 2); 
-  text("Hits: " + hits, width / 2, height / 2 + 20);
-  text("Misses: " + misses, width / 2, height / 2 + 40);
-  text("Accuracy: " + (float)hits*100f/(float)(hits+misses) +"%", width / 2, height / 2 + 60);
-  text("Total time taken: " + timeTaken + " sec", width / 2, height / 2 + 80);
-  text("Average time for each target: " + nf((timeTaken)/(float)(hits+misses), 0, 3) + " sec", width / 2, height / 2 + 100);
-  text("Average time for each target + penalty: " + nf(((timeTaken)/(float)(hits+misses) + penalty), 0, 3) + " sec", width / 2, height / 2 + 140);
+  text("Finished!", width/2, 20); 
+  text("Hits: " + hits, width / 2,  40);
+  text("Misses: " + misses, width / 2, + 60);
+  text("Accuracy: " + (float)hits*100f/(float)(hits+misses) +"%", width / 2,  80);
+  text("Total time taken: " + timeTaken + " sec", width / 2,  100);
+  text("Average time for each target: " + nf((timeTaken)/(float)(hits+misses), 0, 3) + " sec", width / 2,  120);
+  text("Average time for each target + penalty: " + nf(((timeTaken)/(float)(hits+misses) + penalty), 0, 3) + " sec", width / 2,  180);
+  
+
+  for(i=1;i<=24;i++){text("Target"+i+":"+ fitz(dificulty_list.get(i-1)),width/3,h+32*i);}
+  for(i=1;i<=24;i++){text("Target "+(i+23)+": " +fitz(dificulty_list.get(i+23)),2*width/3,h+32*i);}
+  
 
   saveFrame("results-######.png");    // saves screenshot in current folder
 }
@@ -138,17 +151,23 @@ void mouseReleased()
     println("We're done!");
   }
 
-  Target target = getTargetBounds(trials.get(trialNum));    // get the location and size for the target in the current trial
+  Target target = getTargetBounds(trials.get(trialNum));  // get the location and size for the target in the current trial
+  
 
   // Check to see if mouse cursor is inside the target bounds
   if (dist(target.x, target.y, mouseX, mouseY) < target.w/2)
   {
     System.out.println("HIT! " + trialNum + " " + (millis() - startTime));     // success - hit!
     hits++; // increases hits counter
+    if(trialNum==0){dificulty_list.add(0.0);}
+    else{dificulty(trialNum);}
   } else
   {
     System.out.println("MISSED! " + trialNum + " " + (millis() - startTime));  // fail
     misses++;   // increases misses counter
+    if(trialNum==0){dificulty_list.add(0.0);}
+    else{dificulty_list.add(-1.0);}
+    
   }
 
   trialNum++;   // move on to the next trial; UI will be updated on the next draw() cycle
@@ -198,15 +217,48 @@ void drawTarget(int i)
 }
 
 void drawArrow(int x1, int y1, int x2, int y2) {
-  stroke(0,0,255);
-  line(x1, y1, x2, y2);
-  pushMatrix();
-  translate(x2, y2);
-  float a = atan2(x1-x2, y2-y1);
-  rotate(a);
+  if(x1==x2 && y1==y2){
+    stroke(237,110,140);     // stroke light gray
+    strokeWeight(3);   // stroke weight 2
+    pushMatrix();
+    circle(x1, y1, TARGET_SIZE-2);
+    popMatrix();
+  }
+  else{
     stroke(0,0,255);
-  line(0, 0, -10, -10);
-  stroke(0,0,255);
-  line(0, 0, 10, -10);
-  popMatrix();
+    strokeWeight(6  );
+    line(x1, y1, x2, y2);//cria a linha
+    pushMatrix();//linha puxada para a matriz, onde todas as operacoes serao executadas sobre ela
+    translate(x2, y2);
+    float a = atan2(x1-x2, y2-y1);
+    rotate(a);
+    stroke(0,0,255);
+    line(0, 0, -10, -10);
+    stroke(0,0,255);
+    line(0, 0, 10, -10);
+    popMatrix();
+  }
 } 
+
+void dificulty(int trial){
+  Target target = getTargetBounds(trials.get(trial));
+  Target target1 = getTargetBounds(trials.get(trial-1));
+  float distancia = dist(target.x,target.y,target1.x,target1.y);
+  float difi=(distancia/target.w)+1;
+  dificulty_list.add(difi);
+  
+}
+
+String fitz(float ind){
+  if(ind==0.0){
+    return "---";
+  }
+  else if(ind==-1.0){
+    return "MISSED";
+  }
+  
+  else{
+    return String.valueOf(String.format("%.3f", ind));
+  }
+  
+}
