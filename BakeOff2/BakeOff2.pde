@@ -109,7 +109,6 @@ void randomizeTrials()
     for (int k = 0; k < NUM_REPEATS; k++)  // each target will repeat 'NUM_REPEATS' times
       trials.add(i);
   Collections.shuffle(trials);             // randomize the trial order
-
   System.out.println("trial order: " + trials);    // prints trial order - for debug purposes
 }
 
@@ -202,7 +201,8 @@ void drawTarget(int i)
     alpha(100);
     circle(target.x, target.y, target.w);   // draw target
   }
-  if((trialNum + 1) < trials.size() && trials.get(trialNum + 1) != trials.get(trialNum)){
+  if((trialNum + 1) < trials.size()){
+    if(trials.get(trialNum + 1) != trials.get(trialNum)){
     int nextTargetId = trials.get(trialNum + 1);
     Target nextTarget = getTargetBounds(nextTargetId);   // get the location and size for the circle with ID:i
     stroke((220));     // stroke light gray
@@ -212,19 +212,19 @@ void drawTarget(int i)
     Target o = getTargetBounds(trials.get(trialNum));
     Target d = getTargetBounds(trials.get(trialNum + 1));
     drawArrow(o.x , o.y , d.x, d.y) ;
+    }
+    else{
+      Target t = getTargetBounds(trials.get(trialNum));
+      drawArrow( t.x - int(t.w * 1.5), t.y, t.x - int (t.w * 0.6), t.y);
+      drawArrow( t.x + int(t.w * 1.5), t.y, t.x + int (t.w * 0.6), t.y);
+      drawArrow( t.x, t.y - int(t.w * 1.5), t.x, t.y - int (t.w * 0.6));
+      drawArrow( t.x, t.y + int(t.w * 1.5), t.x, t.y + int (t.w * 0.6));
+    }
   }
   noStroke();    // next targets won't have stroke (unless it is the intended target
 }
 
 void drawArrow(int x1, int y1, int x2, int y2) {
-  if(x1==x2 && y1==y2){
-    stroke(237,110,140);     // stroke light gray
-    strokeWeight(3);   // stroke weight 2
-    pushMatrix();
-    circle(x1, y1, TARGET_SIZE-2);
-    popMatrix();
-  }
-  else{
     stroke(0,0,255);
     strokeWeight(6  );
     line(x1, y1, x2, y2);//cria a linha
@@ -237,7 +237,17 @@ void drawArrow(int x1, int y1, int x2, int y2) {
     stroke(0,0,255);
     line(0, 0, 10, -10);
     popMatrix();
-  }
+}
+void drawElipseArrow(int centerx, int centery, int w, int h) {
+    stroke(0,0,255);
+    strokeWeight(6  );
+    ellipse(centerx,centery, w, h);//cria a linha
+    pushMatrix();//linha puxada para a matriz, onde todas as operacoes serao executadas sobre ela
+    stroke(0,0,255);
+    line(0, 0, -10, -10);
+    stroke(0,0,255);
+    line(0, 0, 10, -10);
+    popMatrix();
 } 
 
 void dificulty(int trial){
