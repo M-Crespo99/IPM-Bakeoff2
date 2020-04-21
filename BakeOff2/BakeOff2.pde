@@ -40,7 +40,7 @@ class Target
   }
 }
 
-
+int cursor_width=100;
 
 ArrayList<Float> dificulty_list = new ArrayList<Float>();
 
@@ -61,6 +61,7 @@ void setup()
   TOP_PADDING    = height/2 - TARGET_SIZE - 1.5*TARGET_PADDING - 1.5*MARGIN;       // set the margin of the grid of targets to the top of the canvas; do not change this!
   
   noStroke();        // draw shapes without outlines
+  noCursor();
   frameRate(60);     // set frame rate
 
   // Text and font setup
@@ -83,6 +84,9 @@ void draw()
 
   // Draw targets
   for (int i = 0; i < 16; i++) drawTarget(i);
+  ellipseMode(CENTER);
+  fill(252,248,112,126);
+  ellipse(mouseX,mouseY,cursor_width,cursor_width);
 }
 
 boolean hasEnded() {
@@ -133,7 +137,7 @@ void printResults(float timeTaken, float penalty)
   
 
   for(i=1;i<=24;i++){text("Target"+i+":"+ fitz(dificulty_list.get(i-1)),width/3,h+32*i);}
-  for(i=1;i<=24;i++){text("Target "+(i+23)+": " +fitz(dificulty_list.get(i+23)),2*width/3,h+32*i);}
+  for(i=1;i<=24;i++){text("Target "+(i+24)+": " +fitz(dificulty_list.get(i+23)),2*width/3,h+32*i);}
   
 
   saveFrame("results-######.png");    // saves screenshot in current folder
@@ -154,17 +158,18 @@ void mouseReleased()
   
 
   // Check to see if mouse cursor is inside the target bounds
-  if (dist(target.x, target.y, mouseX, mouseY) < target.w/2)
+  if (dist(target.x, target.y, mouseX, mouseY) < (target.w/2+cursor_width/2))
   {
     System.out.println("HIT! " + trialNum + " " + (millis() - startTime));     // success - hit!
     hits++; // increases hits counter
-    if(trialNum==0){dificulty_list.add(0.0);}
+    if(trialNum==0){dificulty_list.add(-5.000);}
     else{dificulty(trialNum);}
-  } else
+  } 
+  else
   {
     System.out.println("MISSED! " + trialNum + " " + (millis() - startTime));  // fail
     misses++;   // increases misses counter
-    if(trialNum==0){dificulty_list.add(0.0);}
+    if(trialNum==0){dificulty_list.add(-5.000);}
     else{dificulty_list.add(-1.0);}
     
   }
@@ -254,13 +259,13 @@ void dificulty(int trial){
   Target target = getTargetBounds(trials.get(trial));
   Target target1 = getTargetBounds(trials.get(trial-1));
   float distancia = dist(target.x,target.y,target1.x,target1.y);
-  float difi=(distancia/target.w)+1;
+  float difi=log((distancia/target.w)+1)/log(2);
   dificulty_list.add(difi);
   
 }
 
 String fitz(float ind){
-  if(ind==0.0){
+  if(ind==-5.000){
     return "---";
   }
   else if(ind==-1.0){
