@@ -41,6 +41,8 @@ class Target
 }
 
 int cursor_width=100;
+int m1= 0;
+int m2=0;
 
 ArrayList<Float> dificulty_list = new ArrayList<Float>();
 
@@ -155,22 +157,35 @@ void mouseReleased()
   }
 
   Target target = getTargetBounds(trials.get(trialNum));  // get the location and size for the target in the current trial
-  
 
   // Check to see if mouse cursor is inside the target bounds
   if (dist(target.x, target.y, mouseX, mouseY) < (target.w/2+cursor_width/2))
   {
     System.out.println("HIT! " + trialNum + " " + (millis() - startTime));     // success - hit!
     hits++; // increases hits counter
-    if(trialNum==0){dificulty_list.add(-5.000);}
-    else{dificulty(trialNum);}
+    if(trialNum==0){
+      dificulty_list.add(-5.000);
+      m1=mouseX;
+      m2=mouseY;
+    }
+    else{
+      dificulty(trialNum,m1,m2);
+      m1=mouseX;
+      m2=mouseY;
+    }
   } 
   else
   {
     System.out.println("MISSED! " + trialNum + " " + (millis() - startTime));  // fail
     misses++;   // increases misses counter
-    if(trialNum==0){dificulty_list.add(-5.000);}
-    else{dificulty_list.add(-1.0);}
+    if(trialNum==0){
+      dificulty_list.add(-5.000);
+      m1=mouseX;
+      m2=mouseY;
+  }
+    else{dificulty_list.add(-1.0);
+      m1=mouseX;
+      m2=mouseY;}
     
   }
 
@@ -255,10 +270,10 @@ void drawElipseArrow(int centerx, int centery, int w, int h) {
     popMatrix();
 } 
 
-void dificulty(int trial){
+void dificulty(int trial, int a, int b){
   Target target = getTargetBounds(trials.get(trial));
-  Target target1 = getTargetBounds(trials.get(trial-1));
-  float distancia = dist(target.x,target.y,target1.x,target1.y);
+  //Target target1 = getTargetBounds(trials.get(trial-1));
+  float distancia = dist(target.x,target.y,a,b);
   float difi=log((distancia/target.w)+1)/log(2);
   dificulty_list.add(difi);
   
